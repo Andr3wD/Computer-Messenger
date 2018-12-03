@@ -6,29 +6,24 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server implements Runnable {
-	//this class will be for creating servers
+public class Server extends ServerManager implements Runnable {
+	//this class will be for listening and managing independent client connections
 	ServerSocket server;
 	Socket client;
-	boolean close = false;
-	int port;
-	//constructor
-	Server(int port){
-		this.port = port;
+	
+	public Server(ServerSocket server,Socket client) {
+		this.client = client;
+		this.server = server;
 	}
+	
 	//run method is part of Runnable, it's what's called when the thread is started.
 	public void run() {
-		try {
-			server = new ServerSocket(port); //0 port automatically assigns the port
-			System.out.println("Waiting for connction");
-			client = server.accept(); //waits for connection on port, stops all activity until connection is established
-			System.out.println("Client has connected, starting to listen to socket.");
-			listen();
-		} catch (IOException e) {
-			System.out.println("Failed connection.");
-			System.exit(-1);
-		}
+		listen();
 	}
+	
+	/**
+	 * Listens for message sent by client.
+	 */
 	public void listen() {
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -38,7 +33,7 @@ public class Server implements Runnable {
 			while(true) {
 				try {
 					String input = in.readLine(); //read from input stream
-					System.out.println("Server in:" + input);
+					System.out.println("Server in/out:" + input);
 					out.println(input); //output input to stream.
 				} catch(IOException a) {
 					System.out.println("Unable to read");
@@ -50,6 +45,10 @@ public class Server implements Runnable {
 			System.exit(-1);
 		}
 	}
+	
+	/**
+	 * Closes connection with client.
+	 */
 	public void close() {
 		try {
 			close = true;
